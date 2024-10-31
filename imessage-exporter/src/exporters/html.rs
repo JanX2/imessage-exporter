@@ -6,7 +6,20 @@ use std::{
     },
     fs::File,
     io::{BufWriter, Write},
+    path::{PathBuf},
 };
+
+fn append_extension(path: &mut PathBuf, new_ext: &str) {
+    // Check if the current path has an extension
+    if path.extension().is_none() {
+        // If no existing extension, set the new extension
+        path.set_extension(new_ext);
+    } else {
+        // If it has an extension, append the new one
+        let new_file_name = format!("{}.{}", path.to_string_lossy(), new_ext);
+        *path = PathBuf::from(new_file_name); // Update the borrowed path
+    }
+}
 
 use crate::{
     app::{
@@ -158,7 +171,7 @@ impl<'a> Exporter<'a> for HTML<'a> {
                     Vacant(entry) => {
                         let mut path = self.config.options.export_path.clone();
                         path.push(self.config.filename(chatroom));
-                        path.set_extension("html");
+                        append_extension(&mut path, "html");
 
                         // If the file already exists, don't write the headers again
                         // This can happen if multiple chats use the same group name
